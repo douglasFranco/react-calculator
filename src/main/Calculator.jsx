@@ -13,16 +13,49 @@ const initialState = {
 
 const Calculator = props => {
 
-  const [state, setState] = useState(initialState)
+  const [state, setState] = useState({...initialState})
 
-  const clearMemory = () => setState(initialState)
+  const clearMemory = () => setState({...initialState})
 
   const setOperation = (operation) => {
-    console.log(operation)
+    if(state.current === 0){
+      state.operation = operation
+      state.current = 1
+      state.clearDisplay = true
+      setState({...state})
+    }else{
+      const equals = operation === '='
+      try{
+        state.values[0] = eval(`${state.values[0]} ${state.operation} ${state.values[1]}`)
+      }catch(e){
+        state.values[0] = state.displayValue
+      }
+      
+      state.values[1] = 0
+      state.displayValue = state.values[0]
+      state.operation = equals ? null : operation
+      state.current = equals ? 0 : 1
+      state.clearDisplay = !equals
+      setState({...state})
+    }
   }
   
   const addDigit = (n) => {
-    console.log(n)
+    if(n === '.' && state.displayValue.includes('.')){
+      return
+    }
+
+    const clearDisplay = state.displayValue === '0' || state.clearDisplay
+    const currentValue = clearDisplay ? '' : state.displayValue
+    state.displayValue = currentValue + n
+    state.clearDisplay = false
+    setState({...state})
+    console.log(state)
+
+    if(n !== '.') {           
+      state.values[state.current ] =  parseFloat(state.displayValue)
+      setState({...state})
+    }
   }
 
   return (
